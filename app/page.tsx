@@ -1,65 +1,136 @@
-import Image from "next/image";
+'use client'
+
+import { Box, Container, Heading, Text, Button, VStack, SimpleGrid, Card, CardBody, Badge, Icon, Flex } from '@chakra-ui/react'
+import { useRouter } from 'next/navigation'
+import { getAllCases } from '@/lib/mockData'
+import { useState, useEffect } from 'react'
+import { AuditCase } from '@/types'
+import { FiPlus, FiFileText, FiClock } from 'react-icons/fi'
 
 export default function Home() {
+  const router = useRouter()
+  const [cases, setCases] = useState<AuditCase[]>([])
+
+  useEffect(() => {
+    setCases(getAllCases())
+  }, [])
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Completed': return 'green'
+      case 'In Progress': return 'blue'
+      case 'Open': return 'orange'
+      default: return 'gray'
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <Box minH="100vh" bg="gray.50">
+      <Box bg="blue.600" color="white" py={6} px={8} boxShadow="md">
+        <Container maxW="container.xl">
+          <Heading size="lg">Security Audit Tool</Heading>
+          <Text mt={2}>Comprehensive Security Audit & Compliance Management</Text>
+        </Container>
+      </Box>
+
+      <Container maxW="container.xl" py={8}>
+        <Flex justify="space-between" align="center" mb={6}>
+          <VStack align="start" spacing={1}>
+            <Heading size="md">Audit Cases</Heading>
+            <Text color="gray.600">Manage and track all audit cases</Text>
+          </VStack>
+          <Button
+            leftIcon={<Icon as={FiPlus} />}
+            colorScheme="blue"
+            size="lg"
+            onClick={() => router.push('/create-audit')}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+            New Audit Case
+          </Button>
+        </Flex>
+
+        {cases.length === 0 ? (
+          <Card>
+            <CardBody>
+              <VStack spacing={4} py={12}>
+                <Icon as={FiFileText} boxSize={16} color="gray.400" />
+                <Heading size="md" color="gray.600">No Audit Cases Yet</Heading>
+                <Text color="gray.500">Create your first audit case to get started</Text>
+                <Button
+                  leftIcon={<Icon as={FiPlus} />}
+                  colorScheme="blue"
+                  onClick={() => router.push('/create-audit')}
+                >
+                  Create New Audit Case
+                </Button>
+              </VStack>
+            </CardBody>
+          </Card>
+        ) : (
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+            {cases.map((auditCase) => (
+              <Card
+                key={auditCase.id}
+                cursor="pointer"
+                _hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}
+                transition="all 0.2s"
+                onClick={() => router.push(`/dashboard/${auditCase.id}`)}
+              >
+                <CardBody>
+                  <VStack align="start" spacing={3}>
+                    <Flex justify="space-between" w="full">
+                      <Badge colorScheme={getStatusColor(auditCase.status)} fontSize="sm">
+                        {auditCase.status}
+                      </Badge>
+                      <Text fontSize="xs" color="gray.500">
+                        {auditCase.id}
+                      </Text>
+                    </Flex>
+                    
+                    <Heading size="sm">{auditCase.clientInfo.companyName}</Heading>
+                    
+                    <VStack align="start" spacing={1} w="full">
+                      <Text fontSize="sm" color="gray.600">
+                        <strong>Industry:</strong> {auditCase.clientInfo.industry}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        <strong>Type:</strong> {auditCase.metadata.auditType}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        <strong>Contact:</strong> {auditCase.clientInfo.contactName}
+                      </Text>
+                    </VStack>
+
+                    <Flex align="center" gap={2} fontSize="sm" color="gray.500">
+                      <Icon as={FiClock} />
+                      <Text>
+                        Created: {new Date(auditCase.createdAt).toLocaleDateString()}
+                      </Text>
+                    </Flex>
+
+                    <Box w="full" pt={2}>
+                      <Flex justify="space-between" fontSize="sm" mb={1}>
+                        <Text fontWeight="medium">Overall Progress</Text>
+                        <Text color="blue.600" fontWeight="bold">
+                          {Math.round((auditCase.overallScore / auditCase.maxScore) * 100)}%
+                        </Text>
+                      </Flex>
+                      <Box w="full" h="8px" bg="gray.200" borderRadius="full" overflow="hidden">
+                        <Box
+                          h="full"
+                          bg="blue.500"
+                          w={`${(auditCase.overallScore / auditCase.maxScore) * 100}%`}
+                          transition="width 0.3s"
+                        />
+                      </Box>
+                    </Box>
+                  </VStack>
+                </CardBody>
+              </Card>
+            ))}
+          </SimpleGrid>
+        )}
+      </Container>
+    </Box>
+  )
 }
