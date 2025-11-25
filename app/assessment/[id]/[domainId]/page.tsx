@@ -2,10 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-
-export function generateStaticParams() {
-  return []
-}
 import {
   Box,
   Container,

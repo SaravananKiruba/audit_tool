@@ -1,12 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  basePath: '/audit_tool',
+  basePath: process.env.NODE_ENV === 'production' ? '/audit_tool' : '',
   images: {
     unoptimized: true,
   },
   trailingSlash: true,
+  allowedDevOrigins: ['http://172.27.144.1:3000'],
 };
 
 export default nextConfig;
